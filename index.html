@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwriting Recognition</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #imagePreview {
+            margin-top: 10px;
+            width: 150px; /* Reduced width for zoom out effect */
+            height: 150px; /* Reduced height for zoom out effect */
+            object-fit: contain; /* Maintain aspect ratio */
+            border: 1px solid #ddd;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+
+        #result {
+            margin-top: 10px;
+            font-size: 16px; /* Reduced font size for zoom out effect */
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload a Handwriting Image</h1>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadImage()">Upload and Predict</button>
+
+    <h3 id="result"></h3>
+    <img id="imagePreview" src="" alt="Image Preview" />
+
+    <script>
+        function uploadImage() {
+            const input = document.getElementById('fileInput');
+            if (input.files.length === 0) {
+                alert("Please select a file!");
+                return;
+            }
+
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('http://localhost:5000/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = "Predicted Class: " + data.predicted_class;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('imagePreview').src = '';
+            }
+        });
+    </script>
+</body>
+</html>
